@@ -54,8 +54,8 @@ class baseline_val_dataloader(Dataset):
                     
             elif self.dataset == 'k400':
                 # self.all_paths = open(os.path.join(cfg.kinetics_path, 'k400val_full_path_resized_annos.txt'),'r').read().splitlines()
-                all_paths = open(os.path.join(cfg.kinetics_path, 'annotation_val_fullpath_resizedvids.txt'),'r').read().splitlines()
-                self.all_paths = [x.replace(f'/home/c3-0/datasets/kin400_resized/val/', os.path.join(cfg.kinetics_path, 'val') + os.sep) for x in all_paths]
+                all_paths = open(os.path.join(cfg.kinetics_path, 'annotation_test_fullpath_resizedvids.txt'),'r').read().splitlines()
+                self.all_paths = [x.replace(f'/home/c3-0/datasets/kin400_resized/test/', os.path.join(cfg.kinetics_path, 'test') + os.sep) for x in all_paths]
 
             elif self.dataset == 'ucf101_obf':
                 self.all_paths = glob.glob('/home/c3-0/ishan/privacy_preserving1/yolo_based_obfuscation/UCF101/blackened/test/*/*')
