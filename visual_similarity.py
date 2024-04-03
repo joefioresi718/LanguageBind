@@ -29,7 +29,7 @@ def clip_similarities(video_list, dataset_name):
     device = torch.device(device)
     # CLIP model similarities.
     clip_type = {
-        'video': 'LanguageBind_Video',  # also LanguageBind_Video
+        'video': 'LanguageBind_Video_FT',  # also LanguageBind_Video
     }
 
     c_model = LanguageBind(clip_type=clip_type, cache_dir='./cache_dir')
@@ -54,7 +54,7 @@ def clip_similarities(video_list, dataset_name):
     batch_size = 128
     # Custom dataset.
     c_dataset = baseline_val_dataloader(video_list, dataset=dataset_name, model_name='clip', num_frames=8, shuffle=False)
-    c_loader = DataLoader(c_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+    c_loader = DataLoader(c_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
     print(f'Dataset length: {len(c_dataset)}, Number of batches: {len(c_loader)}')
 
     c_vid_embeddings = torch.zeros((len(c_dataset), 768))
@@ -82,7 +82,7 @@ def video_similarities(video_list, dataset_name):
     batch_size = 16
     # Custom dataset.
     v_dataset = baseline_val_dataloader(video_list, dataset=dataset_name, model_name='vjepa', num_frames=8, shuffle=False)
-    v_loader = DataLoader(v_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+    v_loader = DataLoader(v_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
     print(f'Dataset length: {len(v_dataset)}, Number of batches: {len(v_loader)}')
 
     v_vid_embeddings = torch.zeros((len(v_dataset), num_features))
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     # video_list = video_list[:100]
 
     video_list = None
-    dataset_name = 'ucf101'
+    dataset_name = 'hmdb51'
 
     c_vid_embeddings = clip_similarities(video_list, dataset_name)
     v_vid_embeddings = video_similarities(video_list, dataset_name)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
         for j, vid2 in enumerate(video_list):
             vid1 = os.path.basename(vid1)
             vid2 = os.path.basename(vid2)
-            if i != j and c_vid_similarities[i][j] > 0.9 and v_vid_similarities[i][j] < 0.4:
+            if i != j and c_vid_similarities[i][j] > 0.90 and v_vid_similarities[i][j] < 0.6:
                 print(f'{vid1} and {vid2} have high CLIP similarity {c_vid_similarities[i][j]} and low video similarity {v_vid_similarities[i][j]}')
                 v1.append(vid1)
                 v2.append(vid2)
