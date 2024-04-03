@@ -838,7 +838,6 @@ def load_pretrained(
 def init_encoder(
     model_path,
     device=torch.device('cuda:0'),
-    pretrained='/home/jo869742/PythonProjects/models/video/jepa/weights/vith16.pth.tar',
     model_name='vit_huge',
     patch_size=16,
     crop_size=224,
@@ -863,7 +862,7 @@ def init_encoder(
     )
 
     encoder.to(device)
-    encoder = load_pretrained(encoder=encoder, pretrained=pretrained, checkpoint_key=checkpoint_key)
+    encoder = load_pretrained(encoder=encoder, pretrained=model_path, checkpoint_key=checkpoint_key)
     return encoder
 
 
