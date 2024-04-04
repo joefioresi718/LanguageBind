@@ -877,9 +877,9 @@ def init_classifier(encoder, model_path, num_classes=400, depth=1, device=torch.
     classifier = load_pretrained(encoder=classifier, pretrained=model_path, checkpoint_key='classifier')
     return classifier
 
-def init_vjepa(model_path='/home/jo869742/PythonProjects/models/video/jepa/weights/k400-probe.pth.tar'):
-    encoder = init_encoder(model_path)
-    classifier = init_classifier(encoder, model_path)
+def init_vjepa(model_path='/home/jo869742/PythonProjects/models/video/jepa/weights/'):
+    encoder = init_encoder(model_path + 'vith16.pth.tar')
+    classifier = init_classifier(encoder, model_path + 'k400-probe.pth.tar')
     return encoder, classifier
 
 if __name__ == '__main__':
