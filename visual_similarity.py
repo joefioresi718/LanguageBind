@@ -57,7 +57,7 @@ def clip_similarities(video_list, dataset_name):
     c_loader = DataLoader(c_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=8)
     print(f'Dataset length: {len(c_dataset)}, Number of batches: {len(c_loader)}')
 
-    c_vid_embeddings = torch.zeros((len(c_dataset), 768))
+    c_vid_embeddings = torch.zeros((len(c_dataset), 1024))
     with torch.inference_mode():
         for i, (clips, _, _, _) in enumerate(c_loader):
             clips = clips.cuda()
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     # video_list = video_list[:100]
 
     video_list = None
-    dataset_name = 'hmdb51'
+    dataset_name = 'ucf101'
 
     c_vid_embeddings = clip_similarities(video_list, dataset_name)
     v_vid_embeddings = video_similarities(video_list, dataset_name)
