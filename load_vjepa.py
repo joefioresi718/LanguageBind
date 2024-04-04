@@ -850,7 +850,18 @@ def init_encoder(
     uniform_power=True,
     checkpoint_key='target_encoder'
 ):
-    encoder = vit_huge(
+    # encoder = vit_huge(
+    #     img_size=crop_size,
+    #     patch_size=patch_size,
+    #     num_frames=frames_per_clip,
+    #     tubelet_size=tubelet_size,
+    #     uniform_power=uniform_power,
+    #     use_sdpa=use_sdpa,
+    #     use_SiLU=use_SiLU,
+    #     tight_SiLU=tight_SiLU,
+    # )
+
+    encoder = vit_large(
         img_size=crop_size,
         patch_size=patch_size,
         num_frames=frames_per_clip,
@@ -878,7 +889,7 @@ def init_classifier(encoder, model_path, num_classes=400, depth=1, device=torch.
     return classifier
 
 def init_vjepa(model_path='/home/jo869742/PythonProjects/models/video/jepa/weights/'):
-    encoder = init_encoder(model_path + 'vith16.pth.tar')
+    encoder = init_encoder(model_path + 'vitl16.pth.tar')
     classifier = init_classifier(encoder, model_path + 'k400-probe.pth.tar')
     return encoder, classifier
 
