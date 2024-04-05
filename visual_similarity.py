@@ -71,7 +71,14 @@ def clip_similarities(video_list, dataset_name):
             if bs < batch_size:
                 bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
-    c_vid_embeddings = torch.tensor([v for i, v in enumerate(c_vid_embeddings) if i not in bad_idxs])
+    bad_idxs = torch.tensor(bad_idxs)
+    mask = torch.ones(c_vid_embeddings.size(), dtype=torch.bool)
+    mask[bad_idxs] = False
+
+    # Apply mask
+    c_vid_embeddings = c_vid_embeddings[mask]
+
+    # c_vid_embeddings = torch.tensor([v for i, v in enumerate(c_vid_embeddings) if i not in bad_idxs])
 
     del c_model
     return c_vid_embeddings, vid_paths
@@ -101,7 +108,13 @@ def video_similarities(video_list, dataset_name):
             if bs < batch_size:
                 bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
-    v_vid_embeddings = torch.tensor([v for i, v in enumerate(v_vid_embeddings) if i not in bad_idxs])
+    bad_idxs = torch.tensor(bad_idxs)
+    mask = torch.ones(v_vid_embeddings.size(), dtype=torch.bool)
+    mask[bad_idxs] = False
+
+    v_vid_embeddings = v_vid_embeddings[mask]
+
+    # v_vid_embeddings = torch.tensor([v for i, v in enumerate(v_vid_embeddings) if i not in bad_idxs])
 
     del encoder, classifier, v_model 
     return v_vid_embeddings
