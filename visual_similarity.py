@@ -58,17 +58,23 @@ def clip_similarities(video_list, dataset_name):
     print(f'Dataset length: {len(c_dataset)}, Number of batches: {len(c_loader)}')
 
     c_vid_embeddings = torch.zeros((len(c_dataset), 1024))
+    vid_paths = []
+    bad_idxs = []
     with torch.inference_mode():
-        for i, (clips, _, _, _) in enumerate(c_loader):
+        for i, (clips, _, _, vid_path) in enumerate(c_loader):
+            vid_paths.append(vid_path)
             clips = clips.cuda()
             bs = clips.shape[0]
             clips = {'video': {'pixel_values': clips}}
             # TODO: this will pseudo-break if any single video fails.
             c_vid_embeddings[i*batch_size:i*batch_size+bs] = c_model(clips)['video'].detach().cpu()
+            if bs < batch_size:
+                bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
+    c_vid_embeddings = torch.tensor([v for i, v in enumerate(c_vid_embeddings) if i not in bad_idxs])
 
     del c_model
-    return c_vid_embeddings
+    return c_vid_embeddings, vid_paths
 
 
 def video_similarities(video_list, dataset_name):
@@ -86,12 +92,16 @@ def video_similarities(video_list, dataset_name):
     print(f'Dataset length: {len(v_dataset)}, Number of batches: {len(v_loader)}')
 
     v_vid_embeddings = torch.zeros((len(v_dataset), num_features))
+    bad_idxs = []
     with torch.inference_mode():
         for i, (clips, _, _, _) in enumerate(v_loader):
             clips = clips.cuda().permute(0, 2, 1, 3, 4)
             bs = clips.shape[0]
-            # TODO: this will pseudo-break if any single video fails.
             v_vid_embeddings[i*batch_size:i*batch_size+bs] = v_model(clips).detach().cpu()
+            if bs < batch_size:
+                bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
+
+    v_vid_embeddings = torch.tensor([v for i, v in enumerate(v_vid_embeddings) if i not in bad_idxs])
 
     del encoder, classifier, v_model 
     return v_vid_embeddings
@@ -107,14 +117,14 @@ if __name__ == '__main__':
     # video_list = video_list[:100]
 
     video_list = None
-    dataset_name = 'ucf101'
+    dataset_name = 'k400'
 
-    c_vid_embeddings = clip_similarities(video_list, dataset_name)
+    c_vid_embeddings, video_list = clip_similarities(video_list, dataset_name)
     v_vid_embeddings = video_similarities(video_list, dataset_name)
 
-    if video_list is None:
-        dl = baseline_val_dataloader(None, dataset=dataset_name, shuffle=False)
-        video_list = dl.data
+    # if video_list is None:
+    #     dl = baseline_val_dataloader(None, dataset=dataset_name, shuffle=False)
+    #     video_list = dl.data
 
     # Compute class similarities.
     c_vid_similarities = cosine_similarity(c_vid_embeddings)
@@ -142,6 +152,6 @@ if __name__ == '__main__':
                 
     import pandas as pd
 
-    df = pd.DataFrame({'video1': v1, 'video2': v2, 'clip_similarity': c_score, 'video_similarity': v_score})
+    df = pd.DataFrame({'video1': v1, 'video2': v2, 'clip_similarity': c_score, 'vssl_similarity': v_score})
     df.to_csv('CLIPblind_pairs.csv', index=False)
     
