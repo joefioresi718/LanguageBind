@@ -71,6 +71,7 @@ def clip_similarities(video_list, dataset_name):
             if bs < batch_size:
                 bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
+    bad_idxs = [x for x in bad_idxs if x < len(c_vid_embeddings)]
     bad_idxs = torch.tensor(bad_idxs)
     mask = torch.ones(c_vid_embeddings.size(), dtype=torch.bool)
     mask[bad_idxs] = False
@@ -108,6 +109,7 @@ def video_similarities(video_list, dataset_name):
             if bs < batch_size:
                 bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
+    bad_idxs = [x for x in bad_idxs if x < len(v_vid_embeddings)]
     bad_idxs = torch.tensor(bad_idxs)
     mask = torch.ones(v_vid_embeddings.size(), dtype=torch.bool)
     mask[bad_idxs] = False
