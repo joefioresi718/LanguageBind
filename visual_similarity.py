@@ -134,8 +134,8 @@ if __name__ == '__main__':
     video_list = None
     dataset_name = 'k400'
 
-    c_vid_embeddings, video_list = clip_similarities(video_list, dataset_name)
     v_vid_embeddings = video_similarities(video_list, dataset_name)
+    c_vid_embeddings, video_list = clip_similarities(video_list, dataset_name)
 
     # if video_list is None:
     #     dl = baseline_val_dataloader(None, dataset=dataset_name, shuffle=False)
