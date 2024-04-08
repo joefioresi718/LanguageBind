@@ -62,7 +62,7 @@ def clip_similarities(video_list, dataset_name):
     bad_idxs = []
     with torch.inference_mode():
         for i, (clips, _, _, vid_path) in enumerate(c_loader):
-            vid_paths.append(vid_path)
+            vid_paths.extend(vid_path)
             clips = clips.cuda()
             bs = clips.shape[0]
             clips = {'video': {'pixel_values': clips}}
@@ -73,12 +73,10 @@ def clip_similarities(video_list, dataset_name):
 
     bad_idxs = [x for x in bad_idxs if x < len(c_vid_embeddings)]
     bad_idxs = torch.tensor(bad_idxs)
-    mask = torch.ones(c_vid_embeddings.size(), dtype=torch.bool)
+    mask = torch.ones(c_vid_embeddings.shape[0], dtype=torch.bool)
     mask[bad_idxs] = False
-
     # Apply mask
     c_vid_embeddings = c_vid_embeddings[mask]
-
     # c_vid_embeddings = torch.tensor([v for i, v in enumerate(c_vid_embeddings) if i not in bad_idxs])
 
     del c_model
@@ -111,7 +109,7 @@ def video_similarities(video_list, dataset_name):
 
     bad_idxs = [x for x in bad_idxs if x < len(v_vid_embeddings)]
     bad_idxs = torch.tensor(bad_idxs)
-    mask = torch.ones(v_vid_embeddings.size(), dtype=torch.bool)
+    mask = torch.ones(v_vid_embeddings.shape[0], dtype=torch.bool)
     mask[bad_idxs] = False
 
     v_vid_embeddings = v_vid_embeddings[mask]
