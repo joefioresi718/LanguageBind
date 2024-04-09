@@ -29,7 +29,7 @@ def clip_similarities(video_list, dataset_name):
     device = torch.device(device)
     # CLIP model similarities.
     clip_type = {
-        'video': 'LanguageBind_Video_FT',  # also LanguageBind_Video
+        'video': 'LanguageBind_Video_merge',  # also LanguageBind_Video
     }
 
     c_model = LanguageBind(clip_type=clip_type, cache_dir='./cache_dir', similarity=True)
@@ -72,12 +72,12 @@ def clip_similarities(video_list, dataset_name):
                 bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
     bad_idxs = [x for x in bad_idxs if x < len(c_vid_embeddings)]
-    bad_idxs = torch.tensor(bad_idxs)
-    mask = torch.ones(c_vid_embeddings.shape[0], dtype=torch.bool)
-    mask[bad_idxs] = False
-    # Apply mask
-    c_vid_embeddings = c_vid_embeddings[mask]
-    # c_vid_embeddings = torch.tensor([v for i, v in enumerate(c_vid_embeddings) if i not in bad_idxs])
+    if len(bad_idxs) > 0:
+        bad_idxs = torch.tensor(bad_idxs)
+        mask = torch.ones(c_vid_embeddings.shape[0], dtype=torch.bool)
+        mask[bad_idxs] = False
+        # Apply mask
+        c_vid_embeddings = c_vid_embeddings[mask]
 
     del c_model
     return c_vid_embeddings, vid_paths
@@ -108,13 +108,12 @@ def video_similarities(video_list, dataset_name):
                 bad_idxs.extend(list(range(i*batch_size+bs, i*batch_size+batch_size)))
 
     bad_idxs = [x for x in bad_idxs if x < len(v_vid_embeddings)]
-    bad_idxs = torch.tensor(bad_idxs)
-    mask = torch.ones(v_vid_embeddings.shape[0], dtype=torch.bool)
-    mask[bad_idxs] = False
+    if len(bad_idxs) > 0:
+        bad_idxs = torch.tensor(bad_idxs)
+        mask = torch.ones(v_vid_embeddings.shape[0], dtype=torch.bool)
+        mask[bad_idxs] = False
 
-    v_vid_embeddings = v_vid_embeddings[mask]
-
-    # v_vid_embeddings = torch.tensor([v for i, v in enumerate(v_vid_embeddings) if i not in bad_idxs])
+        v_vid_embeddings = v_vid_embeddings[mask]
 
     del encoder, classifier, v_model 
     return v_vid_embeddings
