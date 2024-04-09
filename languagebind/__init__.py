@@ -52,7 +52,7 @@ transform_dict = {
 }
 
 class LanguageBind(nn.Module):
-    def __init__(self, clip_type, use_temp=True, cache_dir='./cache_dir'):
+    def __init__(self, clip_type, use_temp=True, cache_dir='./cache_dir', similarity=False):
         super(LanguageBind, self).__init__()
         self.use_temp = use_temp
         self.modality_encoder = {}
@@ -72,17 +72,30 @@ class LanguageBind(nn.Module):
         self.modality_encoder = nn.ModuleDict(self.modality_encoder)
         self.modality_proj = nn.ModuleDict(self.modality_proj)
 
+        self.simiarity = similarity
+
     def forward(self, inputs):
+        # If computing similarity, no modality projection is needed.
+        if self.simiarity:
+            return self.sim_forward(inputs)
         outputs = {}
         for key, value in inputs.items():
             value = self.modality_encoder[key](**value)[1]
-            # value = self.modality_proj[key](value)
-            # value = value / value.norm(p=2, dim=-1, keepdim=True)
-            # if self.use_temp:
-            #     if key != 'language':
-            #         value = value * self.modality_scale[key].exp()
+            value = self.modality_proj[key](value)
+            value = value / value.norm(p=2, dim=-1, keepdim=True)
+            if self.use_temp:
+                if key != 'language':
+                    value = value * self.modality_scale[key].exp()
             outputs[key] = value
         return outputs
+
+    def sim_forward(self, inputs):
+        outputs = {}
+        for key, value in inputs.items():
+            value = self.modality_encoder[key](**value)[1]
+            outputs[key] = value
+        return outputs
+
 
 def to_device(x, device):
     out_dict = {k: v.to(device) for k, v in x.items()}

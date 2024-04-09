@@ -32,7 +32,7 @@ def clip_similarities(video_list, dataset_name):
         'video': 'LanguageBind_Video_FT',  # also LanguageBind_Video
     }
 
-    c_model = LanguageBind(clip_type=clip_type, cache_dir='./cache_dir')
+    c_model = LanguageBind(clip_type=clip_type, cache_dir='./cache_dir', similarity=True)
     c_model = c_model.to(device)
     c_model.eval()
     # pretrained_ckpt = f'LanguageBind/LanguageBind_Video'
