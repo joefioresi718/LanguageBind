@@ -57,6 +57,10 @@ class baseline_val_dataloader(Dataset):
                 all_paths = open(os.path.join(cfg.kinetics_path, 'annotation_test_fullpath_resizedvids.txt'),'r').read().splitlines()
                 self.all_paths = [x.replace(f'/home/c3-0/datasets/kin400_resized/test/', os.path.join(cfg.kinetics_path, 'test') + os.sep) for x in all_paths]
 
+            elif self.dataset == 'ssv2':
+                self.all_paths = json.load(open(os.path.join(cfg.ssv2_path_folder, 'validation.json'), 'r'))
+                self.classes = json.load(open(os.path.join(cfg.ssv2_path_folder, 'labels.json'), 'r'))
+
             elif self.dataset == 'ucf101_obf':
                 self.all_paths = glob.glob('/home/c3-0/ishan/privacy_preserving1/yolo_based_obfuscation/UCF101/blackened/test/*/*')
                 self.classes = json.load(open(cfg.ucf101_class_mapping))['classes']
@@ -206,6 +210,10 @@ class baseline_val_dataloader(Dataset):
             elif self.dataset == 'k400':
                 vid_path1 = self.data[idx].split(' ')[0]
                 label = int(self.data[idx].split(' ')[1]) - 1 
+            elif self.dataset == 'ssv2':
+                # print(str(self.data[idx]["id"]))
+                vid_path1 = os.path.join(cfg.ssv2_videos, str(self.data[idx]["id"]) + '.webm')
+                label = int(self.classes[self.data[idx]["template"].replace('[', '').replace(']', '')])
 
             elif self.dataset == 'ucf101_obf':
                 vid_path1 = self.data[idx]
@@ -348,13 +356,14 @@ def collate_fn(batch):
 
 
 if __name__ == '__main__':
-    vid_dir = cfg.ucf101_path + '/Videos'
-    videos = glob.glob(vid_dir + '/*/*')
-    all_paths = open(os.path.join(cfg.ucf101_path, 'ucfTrainTestlist', f'testlist01.txt'),'r').read().splitlines()
-    all_paths = [os.path.basename(path) for path in all_paths]
-    videos = [vid for vid in videos if os.path.basename(vid) in all_paths]
-    videos = videos[:10]
-    train_dataset = baseline_val_dataloader(video_list=videos)
+    # vid_dir = cfg.ucf101_path + '/Videos'
+    # videos = glob.glob(vid_dir + '/*/*')
+    # all_paths = open(os.path.join(cfg.ucf101_path, 'ucfTrainTestlist', f'testlist01.txt'),'r').read().splitlines()
+    # all_paths = [os.path.basename(path) for path in all_paths]
+    # videos = [vid for vid in videos if os.path.basename(vid) in all_paths]
+    # videos = videos[:10]
+    # train_dataset = baseline_val_dataloader(video_list=videos)
+    train_dataset = baseline_val_dataloader(dataset='ssv2', shuffle=False)
     train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=False, collate_fn=collate_fn, num_workers=4)
     print(f'Length of training dataset: {len(train_dataset)}')
     t = time.time()
