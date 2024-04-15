@@ -338,7 +338,7 @@ class baseline_val_dataloader(Dataset):
 
             return video_outputs, torch.tensor(frame_id_list)
         except:
-            traceback.print_exc()
+            # traceback.print_exc()
             return None, None
 
 
