@@ -318,7 +318,10 @@ class baseline_val_dataloader(Dataset):
     def build_clip(self, vid_path):
         frame_count = -1
         try:
-            decord_vr = decord.VideoReader(vid_path)
+            if self.dataset == 'ssv2':
+                decord_vr = decord.VideoReader(vid_path, num_threads=2)
+            else:
+                decord_vr = decord.VideoReader(vid_path)
             frame_count = len(decord_vr)
             frame_id_list = np.linspace(0, frame_count-1, self.num_frames, dtype=int)
             video_data = decord_vr.get_batch(frame_id_list)
@@ -335,7 +338,7 @@ class baseline_val_dataloader(Dataset):
 
             return video_outputs, torch.tensor(frame_id_list)
         except:
-            # traceback.print_exc()
+            traceback.print_exc()
             return None, None
 
 
